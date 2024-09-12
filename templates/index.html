@@ -5,31 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mobile Image Editor</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
     <div id="app">
         <header>
             <h1>Mobile Image Editor</h1>
+            <button id="menuToggle"><i class="fas fa-bars"></i></button>
         </header>
         <main>
             <div id="imageContainer">
                 <canvas id="canvas"></canvas>
             </div>
-            <div id="toolbox">
-                <button id="uploadBtn">Upload Image</button>
-                <input type="file" id="fileInput" accept="image/*" style="display: none;">
-                <button id="cropBtn">Crop</button>
-                <button id="resizeBtn">Resize</button>
-                <button id="rotateBtn">Rotate</button>
-                <button id="filterBtn">Filters</button>
-                <button id="adjustBtn">Adjustments</button>
-                <button id="textBtn">Add Text</button>
-                <button id="saveBtn">Save</button>
+            <div id="bottomToolbar">
+                <button id="uploadBtn"><i class="fas fa-upload"></i></button>
+                <button id="cropBtn"><i class="fas fa-crop"></i></button>
+                <button id="resizeBtn"><i class="fas fa-expand"></i></button>
+                <button id="rotateBtn"><i class="fas fa-undo"></i></button>
+                <button id="filterBtn"><i class="fas fa-filter"></i></button>
             </div>
         </main>
+        <nav id="toolbox">
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <button id="adjustBtn"><i class="fas fa-sliders-h"></i> Adjustments</button>
+            <button id="textBtn"><i class="fas fa-font"></i> Add Text</button>
+            <button id="newLayerBtn"><i class="fas fa-layer-group"></i> New Layer</button>
+            <select id="blendModeSelect">
+                <option value="source-over">Normal</option>
+                <option value="multiply">Multiply</option>
+                <option value="screen">Screen</option>
+                <option value="overlay">Overlay</option>
+                <option value="darken">Darken</option>
+                <option value="lighten">Lighten</option>
+                <option value="color-dodge">Color Dodge</option>
+                <option value="color-burn">Color Burn</option>
+                <option value="hard-light">Hard Light</option>
+                <option value="soft-light">Soft Light</option>
+                <option value="difference">Difference</option>
+                <option value="exclusion">Exclusion</option>
+                <option value="hue">Hue</option>
+                <option value="saturation">Saturation</option>
+                <option value="color">Color</option>
+                <option value="luminosity">Luminosity</option>
+            </select>
+            <button id="saveBtn"><i class="fas fa-save"></i> Save</button>
+        </nav>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="{{ url_for('static', filename='js/canvasManager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/toolManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/imageEditor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/uiManager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>

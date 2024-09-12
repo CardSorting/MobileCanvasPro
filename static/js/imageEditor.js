@@ -1,130 +1,91 @@
 class ImageEditor {
     constructor(canvasId) {
-        this.canvas = new fabric.Canvas(canvasId, {
-            width: window.innerWidth,
-            height: window.innerWidth
-        });
-        this.canvas.setBackgroundColor('#ffffff', this.canvas.renderAll.bind(this.canvas));
-        this.currentImage = null;
-        this.operations = [];
+        this.canvasManager = new CanvasManager(canvasId);
+        this.canvas = this.canvasManager.getCanvas();
+        this.toolManager = new ToolManager(this.canvas);
+        this.layerManager = new LayerManager(this.canvas);
     }
 
     loadImage(url) {
-        return new Promise((resolve, reject) => {
-            fabric.Image.fromURL(url, (img) => {
-                this.currentImage = img;
-                this.canvas.clear();
-                this.canvas.add(img);
-                this.canvas.centerObject(img);
-                this.canvas.setActiveObject(img);
-                this.canvas.renderAll();
-                resolve();
-            }, { crossOrigin: 'anonymous' });
+        return this.canvasManager.loadImage(url).then((img) => {
+            if (this.layerManager.layers.length === 0) {
+                this.layerManager.createLayer();
+            }
+            this.layerManager.addToActiveLayer(img);
+            this.canvas.renderAll();
         });
     }
 
     crop() {
-        if (!this.currentImage) return;
-        const cropRect = new fabric.Rect({
-            fill: 'rgba(0,0,0,0.3)',
-            originX: 'left',
-            originY: 'top',
-            stroke: '#ccc',
-            strokeDashArray: [2, 2],
-            opacity: 1,
-            width: 100,
-            height: 100,
-        });
-
-        this.canvas.add(cropRect);
-        this.canvas.setActiveObject(cropRect);
-        this.canvas.renderAll();
-
-        cropRect.on('modified', () => {
-            const cropped = this.currentImage.toDataURL({
-                left: cropRect.left,
-                top: cropRect.top,
-                width: cropRect.width * cropRect.scaleX,
-                height: cropRect.height * cropRect.scaleY,
-            });
-
-            fabric.Image.fromURL(cropped, (img) => {
-                this.canvas.remove(cropRect);
-                this.canvas.remove(this.currentImage);
-                this.currentImage = img;
-                this.canvas.add(img);
-                this.canvas.centerObject(img);
-                this.canvas.setActiveObject(img);
-                this.canvas.renderAll();
-            });
-        });
+        return this.toolManager.crop();
     }
 
     resize(width, height) {
-        if (!this.currentImage) return;
-        this.currentImage.scaleToWidth(width);
-        this.currentImage.scaleToHeight(height);
-        this.canvas.renderAll();
+        this.toolManager.resize(width, height);
     }
 
     rotate(angle) {
-        if (!this.currentImage) return;
-        this.currentImage.rotate(this.currentImage.angle + angle);
-        this.canvas.renderAll();
+        this.toolManager.rotate(angle);
     }
 
     applyFilter(filterName) {
-        if (!this.currentImage) return;
-        let filter;
-        switch (filterName) {
-            case 'grayscale':
-                filter = new fabric.Image.filters.Grayscale();
-                break;
-            case 'invert':
-                filter = new fabric.Image.filters.Invert();
-                break;
-            case 'sepia':
-                filter = new fabric.Image.filters.Sepia();
-                break;
-        }
-        this.currentImage.filters.push(filter);
-        this.currentImage.applyFilters();
-        this.canvas.renderAll();
+        this.toolManager.applyFilter(filterName);
     }
 
     adjust(adjustType, value) {
-        if (!this.currentImage) return;
-        let filter;
-        switch (adjustType) {
-            case 'brightness':
-                filter = new fabric.Image.filters.Brightness({ brightness: value });
-                break;
-            case 'contrast':
-                filter = new fabric.Image.filters.Contrast({ contrast: value });
-                break;
-            case 'saturation':
-                filter = new fabric.Image.filters.Saturation({ saturation: value });
-                break;
-        }
-        this.currentImage.filters.push(filter);
-        this.currentImage.applyFilters();
-        this.canvas.renderAll();
+        this.toolManager.adjust(adjustType, value);
     }
 
     addText(text, options = {}) {
-        const textObject = new fabric.Text(text, {
-            left: 100,
-            top: 100,
-            fontFamily: options.fontFamily || 'Arial',
-            fontSize: options.fontSize || 20,
-            fill: options.color || '#000000'
-        });
-        this.canvas.add(textObject);
-        this.canvas.setActiveObject(textObject);
-        this.canvas.renderAll();
+        this.toolManager.addText(text, options);
+    }
+
+    setBlendMode(blendMode) {
+        this.toolManager.setBlendMode(blendMode);
     }
 
     toDataURL() {
         return this.canvas.toDataURL({ format: 'jpeg', quality: 0.8 });
+    }
+
+    createLayer() {
+        this.layerManager.createLayer();
+    }
+}
+
+class LayerManager {
+    constructor(canvas) {
+        this.canvas = canvas;
+        this.layers = [];
+        this.activeLayer = null;
+    }
+
+    createLayer() {
+        const layer = new fabric.Group([], {
+            left: 0,
+            top: 0,
+            selectable: false,
+            evented: false
+        });
+        this.layers.push(layer);
+        this.canvas.add(layer);
+        this.setActiveLayer(this.layers.length - 1);
+    }
+
+    setActiveLayer(index) {
+        if (index >= 0 && index < this.layers.length) {
+            this.activeLayer = this.layers[index];
+            this.canvas.setActiveObject(this.activeLayer);
+            this.canvas.renderAll();
+        }
+    }
+
+    addToActiveLayer(object) {
+        if (this.activeLayer) {
+            this.activeLayer.addWithUpdate(object);
+            this.canvas.renderAll();
+        } else {
+            this.canvas.add(object);
+        }
     }
 }
