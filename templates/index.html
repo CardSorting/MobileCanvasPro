@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Image Editor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Mobile Image Editor</h1>
+        </header>
+        <main>
+            <div id="imageContainer">
+                <canvas id="canvas"></canvas>
+            </div>
+            <div id="toolbox">
+                <button id="uploadBtn">Upload Image</button>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <button id="cropBtn">Crop</button>
+                <button id="resizeBtn">Resize</button>
+                <button id="rotateBtn">Rotate</button>
+                <button id="filterBtn">Filters</button>
+                <button id="adjustBtn">Adjustments</button>
+                <button id="textBtn">Add Text</button>
+                <button id="saveBtn">Save</button>
+            </div>
+        </main>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    <script src="{{ url_for('static', filename='js/imageEditor.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
